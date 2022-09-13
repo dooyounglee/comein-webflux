@@ -1,13 +1,13 @@
-package com.doo.comeinwebflux;
+package com.doo.comein;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class ComeinWebfluxApplication {
+public class ComeinApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(ComeinWebfluxApplication.class, args);
+		SpringApplication.run(ComeinApplication.class, args);
 	}
 
 }
