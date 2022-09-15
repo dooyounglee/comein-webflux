@@ -25,14 +25,17 @@ public class ExchangeServiceTest {
 	@Test
 	void listExchangeTest() {
 		
+		// given
 		String id = "userId";
 		List<Exchange> exchangeFlux = List.of(
 				new Exchange(),
 				new Exchange(),
 				new Exchange());
 		
+		// when
 		when(exchangeRepository.findByUserId(id)).thenReturn(Flux.fromIterable(exchangeFlux));
 		
+		// then
 		StepVerifier.create(exchangeService.list(id))
 		.expectNextCount(3)
 		.verifyComplete();
@@ -41,12 +44,15 @@ public class ExchangeServiceTest {
 	@Test
 	void listExchangeNotFoundTest() {
 		
+		// given
 		String id = "userId";
 		
+		// when
 		when(exchangeRepository.findByUserId(id)).thenReturn(Flux.empty());
 		
+		// then
 		StepVerifier.create(exchangeService.list(id))
-		//.expectNextCount(0)
+		.expectNextCount(0)
 		.verifyComplete();
 	}
 }

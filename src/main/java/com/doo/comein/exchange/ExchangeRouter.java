@@ -18,7 +18,7 @@ public class ExchangeRouter {
 	public RouterFunction<ServerResponse> exchangeEndpoint(ExchangeHandler handler) {
 		return RouterFunctions
 				   .route(GET("/exchange/{id}").and(accept(json)), handler::list)
-				//.andRoute()
+				.andRoute(POST("/exchange/add").and(accept(json)), handler::addPost)
 				;
 	}
 }

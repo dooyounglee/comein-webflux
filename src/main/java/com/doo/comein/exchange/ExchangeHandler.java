@@ -7,9 +7,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
-import com.doo.comein.exchange.dto.ExchangeRequest;
-import com.doo.comein.exchange.dto.ExchangeResponse;
-
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -30,8 +27,18 @@ public class ExchangeHandler {
 		String id = request.pathVariable("id");
 		Flux<Exchange> result = exchangeService.list(id);
 		
-		return ServerResponse
-				.ok().contentType(json).body(result, Exchange.class)
+		return ServerResponse.ok().contentType(json)
+				.body(result, Exchange.class)
+				;
+	}
+	
+	public Mono<ServerResponse> addPost(ServerRequest request) {
+		
+		Mono<Exchange> body = request.bodyToMono(Exchange.class);
+		Mono<Exchange> result = body.flatMap(b -> exchangeService.add(b));
+		
+		return ServerResponse.ok().contentType(json)
+				.body(result, Exchange.class)
 				;
 	}
 }
