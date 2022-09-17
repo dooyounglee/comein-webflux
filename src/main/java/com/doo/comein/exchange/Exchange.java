@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 public class Exchange {
 
 	@Id
-	private String _id;
+	private String id;
 	private String userId;
 	private String type;
 	private String targetId;

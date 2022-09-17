@@ -17,8 +17,16 @@ public class ExchangeRouter {
 	@Bean
 	public RouterFunction<ServerResponse> exchangeEndpoint(ExchangeHandler handler) {
 		return RouterFunctions
-				   .route(GET("/exchange/{id}").and(accept(json)), handler::list)
-				.andRoute(POST("/exchange/add").and(accept(json)), handler::addPost)
+				   .route(GET("/exchange/list").and(accept(json)), handler::list)
+				.andRoute(GET("/exchange/{id}").and(accept(json)), handler::get)
+				.andRoute(POST("/exchange/add").and(accept(json)), handler::add)
+				.andRoute(DELETE("/exchange/{id}").and(accept(json)), handler::del)
+				.andRoute(PUT("/exchange").and(accept(json)), handler::edit)
+				
+				.andRoute(GET("/exchange/matching/{id}").and(accept(json)), handler::matching)
+				
+//				.andRoute(GET("/setsession").and(accept(json)), handler::setSession)
+//				.andRoute(GET("/getsession").and(accept(json)), handler::getSession)
 				;
 	}
 }
