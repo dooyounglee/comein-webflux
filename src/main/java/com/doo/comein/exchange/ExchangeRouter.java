@@ -24,6 +24,8 @@ public class ExchangeRouter {
 				.andRoute(PUT("/exchange").and(accept(json)), handler::edit)
 				
 				.andRoute(GET("/exchange/matching/{id}").and(accept(json)), handler::matching)
+				.andRoute(PUT("/exchange/match/request").and(accept(json)), handler::requestMatch)
+				.andRoute(PUT("/exchange/match/accept").and(accept(json)), handler::acceptMatch)
 				
 //				.andRoute(GET("/setsession").and(accept(json)), handler::setSession)
 //				.andRoute(GET("/getsession").and(accept(json)), handler::getSession)

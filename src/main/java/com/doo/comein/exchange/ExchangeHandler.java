@@ -1,6 +1,7 @@
 package com.doo.comein.exchange;
 
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
+import com.doo.comein.exchange.dto.ExchangeDto;
 import com.doo.comein.user.User;
 
 import reactor.core.publisher.Flux;
@@ -87,7 +89,39 @@ public class ExchangeHandler {
 		return ServerResponse.ok().contentType(json)
 				.body(exchangeList, List.class)
 				;
-				
+	}
+	
+	
+	/**
+	 * request: map
+	 * @param request
+	 * @return
+	 */
+	public Mono<ServerResponse> requestMatch(ServerRequest request) {
+		
+		Mono<Map<String, Object>> body = request.bodyToMono(Map.class);
+		Mono<Map<String, Object>> result = body.flatMap(map -> exchangeService.requestMatch(map));
+		
+		return result.flatMap(data -> 
+			ServerResponse.ok().contentType(json)
+			.bodyValue(data)
+		);
+	}
+	
+	/**
+	 * request: ExchangeDto
+	 * @param request
+	 * @return
+	 */
+	public Mono<ServerResponse> acceptMatch(ServerRequest request) {
+		
+		Mono<ExchangeDto> body = request.bodyToMono(ExchangeDto.class);
+		Mono<ExchangeDto> result = body.flatMap(b -> exchangeService.acceptMatch(b));
+		
+		return result.flatMap(data -> 
+			ServerResponse.ok().contentType(json)
+			.bodyValue(data) // 여기랑
+		);
 	}
 	
 	

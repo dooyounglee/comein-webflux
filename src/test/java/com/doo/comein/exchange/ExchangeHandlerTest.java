@@ -4,7 +4,9 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 import java.net.URI;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,6 +31,7 @@ import org.springframework.web.server.WebSession;
 import org.springframework.web.server.session.WebSessionManager;
 
 import com.doo.comein.config.WebTestClientConfig;
+import com.doo.comein.exchange.dto.ExchangeDto;
 import com.doo.comein.user.User;
 
 import reactor.core.publisher.Flux;
@@ -50,13 +53,7 @@ public class ExchangeHandlerTest {
 	
 	@BeforeEach
 	void setup() {
-		client = WebTestClient./*bindToWebHandler(exchange -> {
-			return exchange.getSession()
-					.doOnNext(webSession -> webSession.getAttributes().put("user", 
-							new User("userId", "username", "useremail"))
-							)
-					.then();
-		})*/
+		client = WebTestClient.
 				bindToApplicationContext(context )
 				.webSessionManager(new WebSessionManager() {
 					
@@ -72,14 +69,10 @@ public class ExchangeHandlerTest {
 					
 				})
 				.build();
-		
-//		client.get().uri(URI.create("/session")).accept(json)
-//		.exchange()
-//		;
 	}
 	
 	@Test
-	@DisplayName("1. get_exchangeList success")
+	@DisplayName("get_exchangeList success")
 	@Order(1)
 	void setCustomerListTest() {
 
@@ -106,7 +99,7 @@ public class ExchangeHandlerTest {
 	}
 	
 	@Test
-	@DisplayName("2. get_exchangeList_not_found")
+	@DisplayName("get_exchangeList_not_found")
 	@Order(2)
 	void setCustomerNotFoundTest() {
 
@@ -123,13 +116,13 @@ public class ExchangeHandlerTest {
 			// .body("userId", String.class)
 			.exchange()
 			.expectStatus().isOk()
-			.expectBody(List.class)
+			.expectBodyList(Exchange.class)
 			.value(result -> Assertions.assertThat(result).isEmpty())
 			;
 	}
 	
 	@Test
-	@DisplayName("3. add_exchange_success")
+	@DisplayName("add_exchange_success")
 	@Order(3)
 	void postExchangeSuccess() {
 		
@@ -224,6 +217,95 @@ public class ExchangeHandlerTest {
 		.expectStatus().isOk()
 		.expectBody(Exchange.class)
 		.value(result -> Assertions.assertThat(result).isEqualTo(exchange))
+		;
+	}
+	
+	@Test
+	@DisplayName("get_match_list_success")
+	@Order(8)
+	void get_match_list_success() {
+		
+		// given
+		String id = "exId";
+		Exchange exchange = new Exchange();
+		List<Exchange> exchangeList = List.of(new Exchange(), new Exchange());
+		
+		// when
+		when(exchangeService.get(id)).thenReturn(Mono.just(exchange));
+		when(exchangeService.matchList(exchange)).thenReturn(Flux.fromIterable(exchangeList));
+		
+		// then
+		client.get().uri(URI.create("/exchange/matching/" + id)).accept(json)
+		.exchange()
+		.expectStatus().isOk()
+		.expectBodyList(Exchange.class)
+		.value(result -> Assertions.assertThat(result).isEqualTo(exchangeList))
+		;
+	}
+	
+	@Test
+	@DisplayName("put_request_match_success")
+	@Order(9)
+	void put_request_match_success() {
+		
+		// given
+		Map<String, Object> requestMap = new HashMap<>();
+		requestMap.put("fromId", "fromId");
+		requestMap.put("toId", "toId");
+		
+		Exchange fromExchange = new Exchange("fromId","fromUserId","","",0,0,0,0,"","","","","","");
+		Exchange toExchange = new Exchange("toId","toUserId","","",0,0,0,0,"","","","","","");
+		
+		// when
+		Map<String, Object> returnMap = new HashMap<>();
+		returnMap.put("fromUserId", fromExchange.getUserId());
+		returnMap.put("toUserId", toExchange.getUserId());
+		
+		when(exchangeService.requestMatch(requestMap)).thenReturn(Mono.just(returnMap));
+		
+		// then
+		client.put().uri(URI.create("/exchange/match/request")).accept(json)
+		.bodyValue(requestMap)
+		.exchange()
+		.expectStatus().isOk()
+		.expectBody(Map.class)
+		.value(result -> 
+			Assertions.assertThat(result).isEqualTo(returnMap)
+		)
+		;
+	}
+	
+	@Test
+	@DisplayName("put_accept_match_success")
+	@Order(10)
+	void put_accept_match_success() {
+		
+		// given
+		ExchangeDto exchangeDto = new ExchangeDto().builder()
+				.fromId("fromId")
+				.toId("toId")
+				.build();
+		
+		Exchange fromExchange = new Exchange("fromId","fromUserId","","",0,0,0,0,"","","","","","");
+		Exchange toExchange = new Exchange("toId","toUserId","","",0,0,0,0,"","","","","","");
+		exchangeDto.setFromExchange(fromExchange);
+		exchangeDto.setToExchange(toExchange);
+		
+		// when
+		exchangeDto.setFromUserId(fromExchange.getUserId());
+		exchangeDto.setToUserId(toExchange.getUserId());
+		
+		when(exchangeService.acceptMatch(exchangeDto)).thenReturn(Mono.just(exchangeDto));
+		
+		// then
+		client.put().uri(URI.create("/exchange/match/accept")).accept(json)
+		.bodyValue(exchangeDto) // 여기를 맞춰야?
+		.exchange()
+		.expectStatus().isOk()
+		.expectBody(ExchangeDto.class)
+		.value(result -> 
+			Assertions.assertThat(result).isEqualTo(exchangeDto)
+		)
 		;
 	}
 	
